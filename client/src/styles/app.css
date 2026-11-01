@@ -1,0 +1,61 @@
+/* ==========================================================================
+   React SPA glue
+   The design system lives in assets/css/style.css and catalog.css. These
+   rules only cover behaviour that Bootstrap normally drives with JavaScript.
+   ========================================================================== */
+
+/* Bootstrap's JS adds .show to modals; we control it with React state. */
+.modal.show {
+  display: block;
+}
+
+/* Panels and modals are rendered always; visibility is state-driven. */
+.offcanvas.show {
+  visibility: visible;
+}
+
+/* Toasts are state-driven as well (Bootstrap hides .toast until .show). */
+.toast-stack .toast {
+  display: block;
+}
+
+/* Placeholder shimmer for category cards while /api/categories loads. */
+.category-skeleton {
+  background:
+    linear-gradient(110deg, var(--surface-2) 8%, var(--surface) 18%, var(--surface-2) 33%);
+  background-size: 220% 100%;
+  animation: lumen-shimmer 1.4s linear infinite;
+}
+
+@keyframes lumen-shimmer {
+  to {
+    background-position-x: -220%;
+  }
+}
+
+/* Route-level suspense fallback keeps the header/footer in place. */
+.lumen-page-fallback {
+  display: grid;
+  place-items: center;
+  min-height: 58vh;
+  padding: 80px 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.lumen-page-fallback .spinner-border {
+  color: var(--brand);
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+/* React resets scroll itself; keep hash navigation from hiding content. */
+html {
+  scroll-padding-top: calc(var(--header-h) + 14px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-skeleton {
+    animation: none;
+  }
+}

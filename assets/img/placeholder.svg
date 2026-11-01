@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" role="img" aria-label="Product image coming soon">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#efe9df"/>
+      <stop offset="1" stop-color="#e2d8c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="1000" fill="url(#g)"/>
+  <circle cx="500" cy="430" r="150" fill="none" stroke="#c9bfae" stroke-width="18"/>
+  <path d="M390 520l90-105 70 82 55-62 105 125H390z" fill="#c9bfae"/>
+  <circle cx="435" cy="375" r="28" fill="#c9bfae"/>
+  <text x="500" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="600" fill="#8d8273">Image coming soon</text>
+</svg>

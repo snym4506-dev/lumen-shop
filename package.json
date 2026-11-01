@@ -1,0 +1,37 @@
+{
+  "name": "lumen-shop",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Lumen — curated everyday objects. React 19 + Vite storefront with a SQLite product database and REST API.",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "node --watch server.js",
+    "dev:client": "vite --config client/vite.config.mjs",
+    "build": "vite build --config client/vite.config.mjs",
+    "preview": "vite preview --config client/vite.config.mjs",
+    "seed": "node seed.js",
+    "test:api": "node scripts/test-api.js"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.2",
+    "compression": "^1.8.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "vite": "^8.3.5"
+  }
+}
