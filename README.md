@@ -10,6 +10,12 @@ The catalogue ships with **exactly 50 products** across Audio, Wearables,
 Photography, Footwear, Accessories, Home and Tech, plus locally stored product
 photography so the shop never depends on remote image URLs.
 
+The same React app also builds as a **fully static demo** for GitHub Pages
+(`npm run build:pages`). That build reads a generated JSON snapshot instead of
+the REST API, so the storefront — catalogue, search, filters, sorting,
+pagination, product pages, cart, wishlist, promo codes and theme — runs with no
+server at all. See [Static demo on GitHub Pages](#static-demo-on-github-pages).
+
 ---
 
 ## Highlights
@@ -116,6 +122,8 @@ Generate a suitable key (PowerShell):
 | `npm run dev:server`| Run only Express with Node's watch mode.                               |
 | `npm run dev:client`| Run only the Vite dev server.                                          |
 | `npm run preview`   | Preview the production build with the Vite preview server.             |
+| `npm run build:pages`| Build the static GitHub Pages demo into `client/dist-pages`.          |
+| `npm run preview:pages`| Build and preview the static demo at <http://localhost:4174/lumen-shop/>. |
 | `npm run seed`      | Download missing product images and rebuild the 50-product database.   |
 | `npm run test:api`  | Run the API integration suite against a running server.               |
 
@@ -137,6 +145,8 @@ lumen-shop/
 │  ├─ 404.html               Vite 404 shell (React not-found page, HTTP 404)
 │  ├─ vite.config.mjs        Dev proxy, lazy chunks, /build asset directory
 │  ├─ dist/                  Production build (created by `npm run build`)
+│  ├─ dist-pages/            Static GitHub Pages build (`npm run build:pages`)
+│  ├─ public/data/           Generated catalogue snapshot for the static demo
 │  └─ src/
 │     ├─ main.jsx            Mounts React and imports the shared CSS
 │     ├─ App.jsx             Lazy routes + error boundary + store provider
@@ -144,13 +154,17 @@ lumen-shop/
 │     ├─ components/         Header, footer, cards, panels, quick view, toasts
 │     ├─ context/            StoreContext — cart, wishlist, promo, theme, API cache
 │     ├─ hooks/              Document meta and body-scroll lock
-│     ├─ lib/                API client, catalogue maths, localStorage helpers
+│     ├─ lib/                API client, static API, catalogue maths, storage
 │     └─ styles/app.css      SPA-only glue (modal/toast display, skeletons)
 ├─ data/
 │  ├─ catalog.js             Canonical 50-product seed data
 │  └─ lumen.db               SQLite database (created by the seeder)
 ├─ scripts/
-│  └─ test-api.js            109-check API integration suite
+│  ├─ test-api.js            109-check API integration suite
+│  ├─ build-static-data.js   Writes client/public/data/catalog.json
+│  └─ build-static.js        Static GitHub Pages build (Vite + base path)
+├─ .github/workflows/
+│  └─ deploy-pages.yml       Builds and publishes the demo to GitHub Pages
 ├─ assets/
 │  ├─ css/
 │  │  ├─ style.css           Shared design system
@@ -178,7 +192,9 @@ Bootstrap Icons are bundled from npm; no CDN or Bootstrap JavaScript is loaded.
 - **Routing** — `client/src/App.jsx` lazy-loads the home, catalogue, product and
   not-found pages. `BrowserRouter` owns in-app navigation; Express serves
   `client/dist/index.html` for `/`, `/products` and `/products/:slug`, and
-  `client/dist/404.html` with HTTP 404 for everything else.
+  `client/dist/404.html` with HTTP 404 for everything else. The static Pages
+  build swaps in `HashRouter` so URLs such as `/#/products` work without a
+  server rewrite.
 - **State** — `StoreContext` hydrates the full catalogue from
   `GET /api/products?limit=100`, normalises every row, and exposes cart,
   wishlist, promo, theme, toast and panel state. Cart and wishlist writes use
@@ -510,6 +526,59 @@ without a full reload.
 
 ---
 
+## Static demo on GitHub Pages
+
+GitHub Pages only serves static files, so the Express API and SQLite database
+cannot run there. Instead the same React app is built against a JSON snapshot:
+
+```bash
+npm run build:pages     # → client/dist-pages
+npm run preview:pages   # → http://localhost:4174/lumen-shop/
+```
+
+What the static build changes:
+
+- `scripts/build-static-data.js` reads the live `data/lumen.db` when it exists
+  (falling back to `data/catalog.js`) and writes
+  `client/public/data/catalog.json` — all 50 products plus category and brand
+  facets.
+- `client/src/lib/staticApi.js` implements `listProducts`, `getProduct`,
+  `getFeatured`, `getCategories` and `getBrands` against that snapshot,
+  mirroring the Express response envelopes, filters, sorting and pagination.
+  `client/src/lib/api.js` swaps it in when `VITE_STATIC=true`.
+- `HashRouter` replaces `BrowserRouter`, so deep links look like
+  `/#/products?category=Audio` and need no server rewrites.
+- `assets/img` is copied into the build and every image URL is prefixed with
+  Vite's `base`, so the site works from a project sub-path.
+- Output goes to `client/dist-pages` so it never overwrites the Express build in
+  `client/dist`.
+
+Nothing in `pages/`, `components/` or `context/` is duplicated — it is one
+codebase with two data sources.
+
+### Publishing
+
+`.github/workflows/deploy-pages.yml` builds and deploys the demo on every push
+to `main`:
+
+1. Push the repository to GitHub (branch `main`).
+2. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
+3. Push again, or run the workflow from the **Actions** tab.
+
+The workflow sets the base path automatically from the repository name
+(`/<repo>/`, or `/` for `<user>.github.io`). Override it locally with
+`LUMEN_BASE`:
+
+```bash
+# PowerShell
+$env:LUMEN_BASE='/my-repo/'; npm run build:pages
+```
+
+The static demo is read-only: admin create/update/delete and the REST API are
+only available when you run the Express server locally or on a Node host.
+
+---
+
 ## Testing
 
 Start the server, then in another terminal:
@@ -580,6 +649,9 @@ Manual checks worth repeating after changes:
 | Frontend edits do not appear             | `npm start` serves the built bundle. Use `npm run dev` and open <http://localhost:5173>, or re-run `npm run build`. |
 | CSS/JS edits do not appear                | Development serves assets with `Cache-Control: no-cache`; hard-refresh once if an old tab is still open. |
 | `npm run build` fails                    | Fix the reported file/import error, then rebuild. Delete `client/dist` for a clean build. |
+| GitHub Pages shows the README instead    | **Settings → Pages → Source** must be **GitHub Actions**, then re-run the workflow. |
+| GitHub Pages demo loads but has no products | `client/public/data/catalog.json` was not generated. Run `npm run build:pages` (the workflow does this automatically). |
+| GitHub Pages demo shows unstyled 404s    | The site was built for the wrong base path. Re-run with `LUMEN_BASE` set to `/<repo>/`. |
 | `/api` calls fail in the dev server       | Make sure `npm run dev:server` (port 3000) is running so Vite can proxy `/api`. |
 | Need a clean database                     | Delete `data/lumen.db*` and run `npm run seed`.                     |
 

@@ -1,8 +1,10 @@
 /* Shared catalogue maths and formatting. Product rows always come from the API. */
+const BASE_URL = import.meta.env.BASE_URL || '/';
+
 export const FREE_SHIPPING = 150;
 export const SHIPPING_FLAT = 9.95;
 export const PROMO_CODES = { LUMEN10: 0.1, WELCOME15: 0.15 };
-export const PLACEHOLDER_IMAGE = '/assets/img/placeholder.svg';
+export const PLACEHOLDER_IMAGE = `${BASE_URL}assets/img/placeholder.svg`;
 
 const money = new Intl.NumberFormat('en-US', {
   style: 'currency',

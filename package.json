@@ -14,7 +14,9 @@
     "dev:server": "node --watch server.js",
     "dev:client": "vite --config client/vite.config.mjs",
     "build": "vite build --config client/vite.config.mjs",
+    "build:pages": "node scripts/build-static.js",
     "preview": "vite preview --config client/vite.config.mjs",
+    "preview:pages": "node scripts/build-static.js --preview",
     "seed": "node seed.js",
     "test:api": "node scripts/test-api.js"
   },
