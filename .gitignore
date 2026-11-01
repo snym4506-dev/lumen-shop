@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output (rebuild with `npm run build` / `npm run build:pages`)
+client/dist/
+client/dist-pages/
+
+# Generated static catalogue snapshot (rebuilt by `npm run build:pages`)
+client/public/data/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Local database files
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
